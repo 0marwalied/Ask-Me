@@ -4,29 +4,65 @@
 
 using namespace std;
 
+void showMenu(user user);
+
 void signUp();
 
 void login();
 
-void loginOrSignup();
+void loginOrSignupMenu();
 
-void loginOrSignup() {
+void showMenu(user user) {
+showMenu:
+	system("cls");
+	cout << "Menu:\n";
+	cout << user.userName << " " << user.password << " " << user.id << " " << user.anonymous << '\n';
+	cout << "\t1: Print Questions To Me\n";
+	cout << "\t1: Print Questions From Me\n";
+	cout << "\t3: Answer Question\n";
+	cout << "\t4: Delete Question\n";
+	cout << "\t5: Ask Question\n";
+	cout << "\t6: List System Users\n";
+	cout << "\t7: Feed\n";
+	cout << "\t8: Logout\n";
+	cout << "Enter number in range (1 - 8): ";
+	string choice; cin >> choice;
+	if ("1" <= choice && choice <= "8" && (int)choice.size() == 1) {
+		switch (stoi(choice)) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		default:
+			exit(0);
+		}
+	} else {
+		cout << "ERROR: Invalid number....Try again\n";
+		system("pause");
+		goto showMenu;
+	}
+}
+
+void loginOrSignupMenu() {
+loginOrSignupMenu:
+	system("cls");
 	cout << "Menu:\n";
 	cout << "\t1: Login\n";
 	cout << "\t2: Sign Up\n";
 	cout << "\nEnter number in range 1 - 2: ";
 	string choice; cin >> choice;
-
 	if (choice == "1") {
 		login();
 	} else if (choice == "2") {
 		signUp();
-		login();
+		goto loginOrSignupMenu;
 	} else {
-		cout << "Invalied number try again :(\n";
+		cout << "Invalid number....try again :(\n";
 		system("pause");
-		system("cls");
-		loginOrSignup();
+		goto loginOrSignupMenu;
 	}
 }
 
@@ -42,17 +78,28 @@ void signUp() {
 	string email; cin >> email;
 	cout << "\nAllow anonymous questions? (0 or 1): ";
 	string anonymous; cin >> anonymous;
-	addNewUser(userName, password);
-	cout << "\nYour email created successfully :)";
+	systemFunctions.addNewUser(userName, password, anonymous);
+	cout << "\nYour email created successfully :)\n";
+	system("pause");
 }
 
 void login() {
+login:
 	system("cls");
 	cout << "\nEnter user name: ";
 	string userName; cin >> userName;
 	cout << "\nEnter Password: ";
 	string password; cin >> password;
-	cout << "\nWelcome :)\n";
+	user user = systemFunctions.checkThisUser(userName, password);
+	if (user.id != "") {
+		cout << "\nWelcome :)\n";
+		system("pause");
+		showMenu(user);
+	}
+	else {
+		cout << "\nThe User Name or Password is incorrect :(\n";
+		system("pause");
+		goto login;
+	}
 	system("pause");
-	system("cls");
 }
