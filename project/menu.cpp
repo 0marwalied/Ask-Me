@@ -16,9 +16,8 @@ void showMenu(user user) {
 showMenu:
 	system("cls");
 	cout << "Menu:\n";
-	// cout << user.userName << " " << user.password << " " << user.id << " " << user.anonymous << '\n';
 	cout << "\t1: Print Questions To Me\n";
-	cout << "\t1: Print Questions From Me\n";
+	cout << "\t2: Print Questions From Me\n";
 	cout << "\t3: Answer Question\n";
 	cout << "\t4: Delete Question\n";
 	cout << "\t5: Ask Question\n";
@@ -30,7 +29,7 @@ showMenu:
 	cout << '\n';
 	if ("1" <= choice && choice <= "8" && (int)choice.size() == 1) {
 		switch (stoi(choice)) {
-		case 1: {break;}
+		case 1: {systemFunctions.printQuestionsToMe(user.id); break;}
 		case 2: {break;}
 		case 3: {break;}
 		case 4: {break;}
