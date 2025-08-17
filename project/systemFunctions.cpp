@@ -17,8 +17,9 @@ struct user {
 	}
 };
 
-struct Systems {
-	Systems() {}
+struct system {
+	system() {}
+
 	string generateId() {
 		srand(time(0));
 		string id = "";
@@ -26,21 +27,17 @@ struct Systems {
 			id += (rand() % 10) + '0';
 		return id;
 	}
-	void addNewUser(const string& userName, const string& paaword, const string& anonymous) {
+
+	vector<user> getUsers() {
+		vector<user>users;
 		ifstream input("users.txt");
-		vector<string>users;
 		string line;
 		while (getline(input, line))
-			users.push_back(line);
+			users.push_back(getUserInfo(line));
 		input.close();
-
-		ofstream output("users.txt");
-		string newUser = userName + " " + paaword + " " + generateId() + " " + (anonymous == "1" ? "anonymous" : "notAnonymous") + '\n';
-		for (auto &it : users)
-			output << it << '\n';
-		output << newUser;
-		output.close();
+		return users;
 	}
+
 	user getUserInfo(const string& line) {
 		vector<string>data;
 		string lineSeg;
@@ -54,6 +51,17 @@ struct Systems {
 		user user(data[0], data[1], data[2], data[3]);
 		return user;
 	}
+
+	void addNewUser(const string& userName, const string& paaword, const string& anonymous) {
+		vector<user>users = getUsers();
+		ofstream output("users.txt");
+		string newUser = userName + " " + paaword + " " + generateId() + " " + (anonymous == "1" ? "anonymous" : "notAnonymous") + '\n';
+		for (auto &user : users)
+			output << user.userName + " " + user.password + " " + user.id + " " + user.anonymous << '\n';
+		output << newUser;
+		output.close();
+	}
+
 	user checkThisUser(const string& userName, const string& password) {
 		ifstream input("users.txt");
 		{
@@ -69,5 +77,13 @@ struct Systems {
 		}
 		input.close();
 		return user();
+	}
+
+	void listSystemUsers(const string& userId) {
+		vector<user>users = getUsers();
+		for (auto &user : users) {
+			if (user.id != userId)cout << "ID: " << user.id << "\t" << "Name: " << user.userName << '\n';
+		}
+		cout << '\n';
 	}
 } systemFunctions;

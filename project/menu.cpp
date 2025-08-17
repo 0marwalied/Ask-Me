@@ -16,7 +16,7 @@ void showMenu(user user) {
 showMenu:
 	system("cls");
 	cout << "Menu:\n";
-	cout << user.userName << " " << user.password << " " << user.id << " " << user.anonymous << '\n';
+	// cout << user.userName << " " << user.password << " " << user.id << " " << user.anonymous << '\n';
 	cout << "\t1: Print Questions To Me\n";
 	cout << "\t1: Print Questions From Me\n";
 	cout << "\t3: Answer Question\n";
@@ -27,18 +27,20 @@ showMenu:
 	cout << "\t8: Logout\n";
 	cout << "Enter number in range (1 - 8): ";
 	string choice; cin >> choice;
+	cout << '\n';
 	if ("1" <= choice && choice <= "8" && (int)choice.size() == 1) {
 		switch (stoi(choice)) {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		default:
-			exit(0);
+		case 1: {break;}
+		case 2: {break;}
+		case 3: {break;}
+		case 4: {break;}
+		case 5: {break;}
+		case 6: {systemFunctions.listSystemUsers(user.id); break;}
+		case 7: {break;}
+		default: {cout << "Loggedout :)\n"; exit(0);}
 		}
+		system("pause");
+		goto showMenu;
 	} else {
 		cout << "ERROR: Invalid number....Try again\n";
 		system("pause");
