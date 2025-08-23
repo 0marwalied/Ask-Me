@@ -3,3 +3,5 @@ hello hello 7974 anonymous
 bahaa 01010 1220 anonymous
 ahmed 01001 8601 anonymous
 ali 00110 0955 notAnonymous
+ama 1111 6345 notAnonymous
+ara 0000 4457 anonymous

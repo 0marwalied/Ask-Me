@@ -8,9 +8,9 @@ void showMenu(user user);
 
 void signUp();
 
-void login();
+user login();
 
-void loginOrSignupMenu();
+user loginOrSignupMenu();
 
 void showMenu(user user) {
 showMenu:
@@ -30,12 +30,12 @@ showMenu:
 	if ("1" <= choice && choice <= "8" && (int)choice.size() == 1) {
 		switch (stoi(choice)) {
 		case 1: {systemFunctions.printQuestionsToMe(user.id); break;}
-		case 2: {break;}
-		case 3: {break;}
-		case 4: {break;}
-		case 5: {break;}
+		case 2: {systemFunctions.printQuestionsFromMe(user.id); break;}
+		case 3: {systemFunctions.answerQuestion(); break;}
+		case 4: {systemFunctions.deleteQuestion(user.id); break;}
+		case 5: {systemFunctions.askQuestion(user.id); break;}
 		case 6: {systemFunctions.listSystemUsers(user.id); break;}
-		case 7: {break;}
+		case 7: {systemFunctions.feed(); break;}
 		default: {cout << "Loggedout :)\n"; exit(0);}
 		}
 		system("pause");
@@ -47,19 +47,22 @@ showMenu:
 	}
 }
 
-void loginOrSignupMenu() {
+user loginOrSignupMenu() {
 loginOrSignupMenu:
 	system("cls");
 	cout << "Menu:\n";
 	cout << "\t1: Login\n";
 	cout << "\t2: Sign Up\n";
-	cout << "\nEnter number in range 1 - 2: ";
+	cout << "\t3: Exit\n";
+	cout << "\nEnter number in range 1 - 3: ";
 	string choice; cin >> choice;
 	if (choice == "1") {
-		login();
+		return login();
 	} else if (choice == "2") {
 		signUp();
 		goto loginOrSignupMenu;
+	} else if (choice == "3") {
+		exit(0);
 	} else {
 		cout << "Invalid number....try again :(\n";
 		system("pause");
@@ -84,7 +87,7 @@ void signUp() {
 	system("pause");
 }
 
-void login() {
+user login() {
 login:
 	system("cls");
 	cout << "\nEnter user name: ";
@@ -95,7 +98,7 @@ login:
 	if (user.id != "") {
 		cout << "\nWelcome :)\n";
 		system("pause");
-		showMenu(user);
+		return user;
 	}
 	else {
 		cout << "\nThe User Name or Password is incorrect :(\n";

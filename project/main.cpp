@@ -4,5 +4,6 @@
 using namespace std;
 
 int main() {
-	loginOrSignupMenu();
+	user user = loginOrSignupMenu();
+	showMenu(user);
 }

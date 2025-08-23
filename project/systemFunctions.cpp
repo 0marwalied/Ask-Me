@@ -3,6 +3,8 @@
 #include "fstream"
 #include "random"
 #include "time.h"
+#include "map"
+
 
 using namespace std;
 
@@ -19,6 +21,14 @@ struct question {
 		this->toUserId = toUserId;
 		this->val = question;
 		this->answer = answer;
+	}
+
+	string generateId() {
+		srand(time(0));
+		string id = "";
+		for (int i = 1; i <= 3; i++)
+			id += (rand() % 10) + '0';
+		return id;
 	}
 
 	vector<string> getQuestionRecordData(const string& line) {
@@ -59,19 +69,64 @@ struct question {
 	}
 	void printQuestion() {
 		cout << "Question Id (" << id << ") from user id (" << fromUserId << ") \t Question: " << val << "\n";
-		cout << "\tAnswer:" << answer << '\n';
-		cout << "threads: \n";
+		cout << "\tAnswer: " << answer << '\n';
+		if (!threads.empty())cout << "threads: \n";
 		for (auto &thread : threads) {
 			cout << "\tThread: Question Id (" << thread.id << ") from user id (" << thread.fromUserId << ") \t Question: " << thread.val << "\n";
-			cout << "\tThread: Answer:" << thread.answer << '\n';
+			cout << "\tThread: Answer: " << thread.answer << '\n';
 		}
 		cout << '\n';
+	}
+
+	void printLine (ofstream& outputLine, const question& question) {
+		outputLine << (question.parent ? "parent" : "thread") << " " << question.id << " " << question.fromUserId << " " << question.toUserId << " " << question.val << '\n';
+		outputLine << question.answer << '\n';
+	};
+
+	void updateQuestionsFile(const vector<question>& questions) {
+		ofstream output("questions.txt");
+		for (auto &question : questions) {
+			printLine(output, question);
+			for (auto &thread : question.threads) {
+				printLine(output, thread);
+			}
+		}
+		output.close();
+	}
+
+	void deleteQuestion(const vector<question>& questions, const string& userId, const string& questionId) {
+		ofstream output("questions.txt");
+		for (auto &question : questions) {
+			if (question.id == questionId && userId == question.toUserId)continue;
+			printLine(output, question);
+			for (auto &thread : question.threads) {
+				if (thread.id == questionId && userId == thread.toUserId)continue;
+				printLine(output, thread);
+			}
+		}
+		output.close();
+	}
+
+	void addNewQuestion(const string& fromUserId, const string& toUserId, const string& questionId, const string& questionValue) {
+		vector<question>questions = getQuestions();
+		if (questionId == "-1") {
+			questions.push_back(question("parent", generateId(), fromUserId, toUserId, questionValue, "no answer"));
+		} else {
+			for (auto &Question : questions) {
+				if (Question.id == questionId) {
+					Question.threads.push_back(question("thread", generateId(), fromUserId, toUserId, questionValue, "no answer"));
+				}
+			}
+		}
+		updateQuestionsFile(questions);
 	}
 };
 
 struct user {
 	string userName, password, id, anonymous;
-	user() {}
+	user() {
+		this->id = generateId();
+	}
 	user(string userName, string password, string id, string anonymous) {
 		this->userName = userName;
 		this->password = password;
@@ -110,16 +165,21 @@ struct user {
 		input.close();
 		return users;
 	}
-
 };
 
 struct system {
-	system() {}
+
+	vector<user>users;
+	vector<question>questions;
+	map<string, bool>isAnonymous;
+	system() {
+		users = user().getUsers(), questions = question().getQuestions();
+		for (auto &user : users) if (user.anonymous == "anonymous") isAnonymous[user.id] = true;
+	}
 
 	void addNewUser(const string& userName, const string& paaword, const string& anonymous) {
-		vector<user>users = user().getUsers();
 		ofstream output("users.txt");
-		string newUser = userName + " " + paaword + " " + user().generateId() + " " + (anonymous == "1" ? "anonymous" : "notAnonymous") + '\n';
+		string newUser = userName + " " + paaword + " " + user().id + " " + (anonymous == "1" ? "anonymous" : "notAnonymous") + '\n';
 		for (auto &user : users)
 			output << user.userName + " " + user.password + " " + user.id + " " + user.anonymous << '\n';
 		output << newUser;
@@ -138,10 +198,10 @@ struct system {
 			}
 		}
 		input.close();
-		return user();
+		return user("", "", "", "");
 	}
+
 	void printQuestionsToMe(const string& userId) {
-		vector<question>questions = question().getQuestions();
 		for (auto &question : questions) {
 			if (question.toUserId == userId) {
 				question.printQuestion();
@@ -150,14 +210,70 @@ struct system {
 	}
 
 	void listSystemUsers(const string& userId) {
-		vector<user>users = user().getUsers();
 		for (auto &user : users) {
 			if (user.id != userId)cout << "ID: " << user.id << "\t" << "Name: " << user.userName << '\n';
 		}
 		cout << '\n';
 	}
-} systemFunctions;
 
-// int main() {
-// 	question().getQuestions();
-// }
+	void printQuestionsFromMe(const string& userId) {
+		for (auto &question : questions) {
+			if (question.fromUserId == userId) {
+				cout << "Question Id (" << question.id << ") " << (!isAnonymous[question.toUserId] ? "!AQ" : "") << " to user id (" << question.toUserId << ")\t Question: " << question.val << "\t Answer: " << question.answer << '\n';
+			}
+		}
+	}
+
+	void answerQuestion() {
+		string questionId;
+		cout << "Enter Question id or -1 to cancel: ";
+		cin >> questionId;
+		if (questionId == "-1") return;
+		for (auto &question : questions) {
+			if (question.id == questionId) {
+				cout << "Question Id (" << question.id << ") " << (!isAnonymous[question.toUserId] ? "!AQ" : "") << " to user id (" << question.toUserId << ")\t Question: " << question.val << "\t Answer: " << question.answer << '\n';
+				if (question.answer != "no answer") cout << "\n\nWarning: Already answered. Answer will be updated\n";
+				cout << "Enter answer: "; cin.ignore(), getline(cin, question.answer);
+			}
+			for (auto &thread : question.threads) {
+				if (thread.id == questionId) {
+					cout << "Thread Id (" << thread.id << ") " << (!isAnonymous[thread.toUserId] ? "!AQ" : "") << " to user id (" << thread.toUserId << ")\t Question: " << thread.val << "\t Answer: " << thread.answer << '\n';
+					if (thread.answer != "no answer") cout << "\n\nWarning: Already answered. Answer will be updated\n";
+					cout << "Enter answer: "; cin.ignore(), getline(cin, thread.answer);
+				}
+			}
+		}
+		question().updateQuestionsFile(questions);
+	}
+
+	void deleteQuestion(const string& userId) {
+		string questionId;
+		cout << "Enter Question Id or -1 to cancel: "; cin >> questionId;
+		question().deleteQuestion(questions, userId, questionId);
+		questions = question().getQuestions();
+	}
+
+	void askQuestion(const string& userId) {
+		string toUserId, questionId, questionValue;
+		cout << "Enter User Id or -1 to cancel: "; cin >> toUserId;
+		if (toUserId == "-1") return;
+		if (!isAnonymous[toUserId])cout << "Note: Anonymous questions are not allowed for this user\n";
+		cout << "For thread question: Enter Question id or -1 for new question: "; cin >> questionId;
+		cout << "Enter question text: "; cin.ignore(), getline(cin, questionValue);
+		question().addNewQuestion(userId, toUserId, questionId, questionValue);
+		questions = question().getQuestions();
+	}
+
+	void feed() {
+		for (auto &question : questions) {
+			cout << "Question Id (" << question.id << ") from user id(" << question.fromUserId << ") " << (!isAnonymous[question.toUserId] ? "To user id(" + question.toUserId + ")" : "");
+			cout << "\t" << question.val << '\n';
+			cout << "\tAnswer: " << question.answer << '\n';
+			for (auto &thread : question.threads) {
+				cout << "Thread parent Quesion ID (" << question.id << ") from user id(" << thread.fromUserId << ") " << (!isAnonymous[thread.toUserId] ? "To user id(" + thread.toUserId + ")" : "");
+				cout << "\t" << thread.val << '\n';
+				cout << "\tAnswer: " << thread.answer << '\n';
+			}
+		}
+	}
+} systemFunctions;
