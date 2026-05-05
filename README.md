@@ -12,7 +12,7 @@ AskMe is a file-based Q&A platform built in **C++** that allows users to ask, an
 
 ## Screencasts 🎥
 
-I recorded screencast videos while developing this project. Watch the development playlist on YouTube: [AskMe Development Screencasts](https://www.youtube.com/watch?v=Uq4JQl_azHc&list=PLv5UNMiYMusDu2Z4sln9wnx1ZgnHeiIDB&pp=gAQB)
+I recorded screencast videos while developing this project. Watch the development playlist on YouTube: [AskMe Development Screencasts](https://www.youtube.com/playlist?list=PLv5UNMiYMusDu2Z4sln9wnx1ZgnHeiIDB)
 
 ## Code Files 🗂️
 
